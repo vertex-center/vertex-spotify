@@ -1,21 +1,36 @@
 package main
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
-	spotifyauth "github.com/zmb3/spotify/v2/auth"
-	"golang.org/x/oauth2/clientcredentials"
 	"log"
 	"net/http"
 )
 
+func errorMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+		err := c.Errors.Last()
+		if err != nil {
+			c.JSON(-1, gin.H{
+				"message": err.Error(),
+			})
+		}
+	}
+}
+
 func InitializeRouter() *gin.Engine {
 	r := gin.Default()
+
+	r.Use(errorMiddleware())
 
 	r.GET("/ping", handlePing)
 
 	authRoutes := r.Group("/auth")
 	authRoutes.GET("/login", handleAuthLogin)
 	authRoutes.GET("/callback", handleAuthCallback)
+
+	r.GET("/user", handleGetUser)
 
 	return r
 }
@@ -33,17 +48,10 @@ func handleAuthLogin(c *gin.Context) {
 }
 
 func handleAuthCallback(c *gin.Context) {
-	credentialsConfig := &clientcredentials.Config{
-		ClientID:     config.SpotifyClientID,
-		ClientSecret: config.SpotifyClientSecret,
-		TokenURL:     spotifyauth.TokenURL,
-	}
-
-	token, err := credentialsConfig.Token(c)
+	code := c.Query("code")
+	token, err := auth.Exchange(context.Background(), code)
 	if err != nil {
 		log.Fatalf("Couldn't retrieve token: %v", err)
-	} else {
-		log.Printf("Token: %s", token)
 	}
 
 	SetSession(token)
@@ -51,4 +59,20 @@ func handleAuthCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK",
 	})
+}
+
+func handleGetUser(c *gin.Context) {
+	session, err := GetSession()
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	user, err := session.client.CurrentUser(c)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }

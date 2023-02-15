@@ -40,7 +40,9 @@ func loadEnv() {
 
 	auth = spotifyauth.New(
 		spotifyauth.WithClientID(config.SpotifyClientID),
-		// spotifyauth.WithClientSecret(config.SpotifyClientSecret),
+		spotifyauth.WithClientSecret(config.SpotifyClientSecret),
 		spotifyauth.WithRedirectURL(config.SpotifyRedirectUri),
+		spotifyauth.WithScopes(spotifyauth.ScopeUserReadEmail),
+		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate),
 	)
 }

@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"errors"
+	"github.com/zmb3/spotify/v2"
+	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
 )
 
 var session *Session = nil
 
 type Session struct {
-	token oauth2.Token
+	token  oauth2.Token
+	client *spotify.Client
 }
 
 func GetSession() (*Session, error) {
@@ -19,7 +23,10 @@ func GetSession() (*Session, error) {
 }
 
 func SetSession(token *oauth2.Token) {
+	httpClient := spotifyauth.New().Client(context.Background(), token)
+
 	session = &Session{
-		token: *token,
+		token:  *token,
+		client: spotify.New(httpClient),
 	}
 }
