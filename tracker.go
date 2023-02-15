@@ -53,9 +53,11 @@ func tick() {
 	}
 
 	if currentTrack == nil {
-		currentTrack = &CurrentTrack{
-			listeningTime: 0,
-			track:         *player.Item,
+		if player.Item != nil {
+			currentTrack = &CurrentTrack{
+				listeningTime: 0,
+				track:         *player.Item,
+			}
 		}
 	} else if player.Playing {
 		currentTrack.listeningTime += 1 * time.Second
