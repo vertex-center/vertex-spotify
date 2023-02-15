@@ -42,7 +42,11 @@ func loadEnv() {
 		spotifyauth.WithClientID(config.SpotifyClientID),
 		spotifyauth.WithClientSecret(config.SpotifyClientSecret),
 		spotifyauth.WithRedirectURL(config.SpotifyRedirectUri),
-		spotifyauth.WithScopes(spotifyauth.ScopeUserReadEmail),
-		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate),
+		spotifyauth.WithScopes(
+			spotifyauth.ScopeUserReadEmail,
+			spotifyauth.ScopeUserReadPrivate,
+			spotifyauth.ScopeUserReadPlaybackState,
+			spotifyauth.ScopeUserReadCurrentlyPlaying,
+		),
 	)
 }

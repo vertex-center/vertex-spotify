@@ -32,6 +32,9 @@ func InitializeRouter() *gin.Engine {
 
 	r.GET("/user", handleGetUser)
 
+	playerRoutes := r.Group("/player")
+	playerRoutes.GET("/", handlePlayer)
+
 	return r
 }
 
@@ -75,4 +78,20 @@ func handleGetUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func handlePlayer(c *gin.Context) {
+	session, err := GetSession()
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	playing, err := session.client.PlayerCurrentlyPlaying(c)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, playing)
 }
