@@ -21,6 +21,8 @@ func main() {
 
 	r := InitializeRouter()
 
+	startTicker()
+
 	err := r.Run(":6150")
 	if err != nil {
 		log.Fatalf("Error while starting server: %v", err)
@@ -43,10 +45,10 @@ func loadEnv() {
 		spotifyauth.WithClientSecret(config.SpotifyClientSecret),
 		spotifyauth.WithRedirectURL(config.SpotifyRedirectUri),
 		spotifyauth.WithScopes(
-			spotifyauth.ScopeUserReadEmail,
 			spotifyauth.ScopeUserReadPrivate,
 			spotifyauth.ScopeUserReadPlaybackState,
 			spotifyauth.ScopeUserReadCurrentlyPlaying,
+			spotifyauth.ScopeStreaming,
 		),
 	)
 }
