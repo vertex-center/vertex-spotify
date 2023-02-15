@@ -34,7 +34,7 @@ func InitializeRouter() *gin.Engine {
 	r.GET("/user", handleGetUser)
 
 	playerRoutes := r.Group("/player")
-	playerRoutes.GET("/", handlePlayer)
+	playerRoutes.GET("", handlePlayer)
 
 	return r
 }
@@ -99,5 +99,23 @@ func handlePlayer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, playing)
+	if c.Query("full") != "" {
+		c.JSON(http.StatusOK, playing)
+		return
+	}
+
+	var track gin.H = nil
+
+	if playing.Item != nil {
+		track = gin.H{
+			"name":   playing.Item.Name,
+			"album":  playing.Item.Album.Name,
+			"artist": playing.Item.Artists[0].Name,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"is_playing": playing.Playing,
+		"track":      track,
+	})
 }
