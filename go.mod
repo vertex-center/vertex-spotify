@@ -5,8 +5,11 @@ go 1.19
 require (
 	github.com/caarlos0/env/v7 v7.0.0
 	github.com/gin-gonic/gin v1.8.2
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.2.0
 	github.com/zmb3/spotify/v2 v2.3.1
+	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
 )
 
 require (
@@ -25,7 +28,6 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

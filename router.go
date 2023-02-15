@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -58,6 +59,11 @@ func handleAuthCallback(c *gin.Context) {
 	}
 
 	SetSession(token)
+
+	err = db.SetToken(token)
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK",

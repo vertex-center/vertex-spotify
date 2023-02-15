@@ -21,9 +21,17 @@ func main() {
 
 	r := InitializeRouter()
 
+	databaseConnect()
 	startTicker()
 
-	err := r.Run(":6150")
+	token, err := db.GetToken()
+	if err == nil {
+		SetSession(token)
+	} else {
+		println(err.Error())
+	}
+
+	err = r.Run(":6150")
 	if err != nil {
 		log.Fatalf("Error while starting server: %v", err)
 	}
