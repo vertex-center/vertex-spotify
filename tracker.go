@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/quentinguidee/microservice-core/pubsub"
 	"github.com/zmb3/spotify/v2"
 	"time"
 )
@@ -13,6 +16,17 @@ type CurrentTrack struct {
 }
 
 var currentTrack *CurrentTrack
+
+func (t CurrentTrack) ToJSON() gin.H {
+	return gin.H{
+		"is_playing": true,
+		"track": gin.H{
+			"name":   t.track.Name,
+			"album":  t.track.Album.Name,
+			"artist": t.track.Artists[0].Name,
+		},
+	}
+}
 
 var ticker = time.NewTicker(1500 * time.Millisecond)
 
@@ -58,6 +72,14 @@ func tick() {
 				listeningTime: 0,
 				track:         *player.Item,
 			}
+
+			message, err := json.Marshal(currentTrack.ToJSON())
+			if err != nil {
+				fmt.Printf("Failed to parse currentTrack info: %v\n", err)
+				return
+			}
+
+			pubsub.Pub("SPOTIFY_PLAYER_CHANGE", message)
 		}
 	} else if player.Playing {
 		currentTrack.listeningTime += 1 * time.Second

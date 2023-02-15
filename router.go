@@ -4,28 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/quentinguidee/microservice-core/router"
 	"log"
 	"net/http"
 )
 
-func errorMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		err := c.Errors.Last()
-		if err != nil {
-			c.JSON(-1, gin.H{
-				"message": err.Error(),
-			})
-		}
-	}
-}
-
 func InitializeRouter() *gin.Engine {
-	r := gin.Default()
-
-	r.Use(errorMiddleware())
-
-	r.GET("/ping", handlePing)
+	r := router.CreateRouter()
 
 	authRoutes := r.Group("/auth")
 	authRoutes.GET("/login", handleAuthLogin)
@@ -37,12 +22,6 @@ func InitializeRouter() *gin.Engine {
 	playerRoutes.GET("", handlePlayer)
 
 	return r
-}
-
-func handlePing(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
 }
 
 func handleAuthLogin(c *gin.Context) {
@@ -93,29 +72,16 @@ func handlePlayer(c *gin.Context) {
 		return
 	}
 
-	playing, err := session.client.PlayerCurrentlyPlaying(c)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
 	if c.Query("full") != "" {
+		playing, err := session.client.PlayerCurrentlyPlaying(c)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		c.JSON(http.StatusOK, playing)
 		return
 	}
 
-	var track gin.H = nil
-
-	if playing.Item != nil {
-		track = gin.H{
-			"name":   playing.Item.Name,
-			"album":  playing.Item.Album.Name,
-			"artist": playing.Item.Artists[0].Name,
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"is_playing": playing.Playing,
-		"track":      track,
-	})
+	c.JSON(http.StatusOK, currentTrack.ToJSON())
 }
