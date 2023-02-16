@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
+	"github.com/quentinguidee/microservice-core/pubsub"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"log"
 )
@@ -18,6 +19,8 @@ type Config struct {
 
 func main() {
 	loadEnv()
+
+	pubsub.InitPubSub()
 
 	r := InitializeRouter()
 
