@@ -66,7 +66,7 @@ func tick() {
 		currentTrack = nil
 	}
 
-	if currentTrack == nil {
+	if currentTrack == nil && player.Playing {
 		if player.Item != nil {
 			currentTrack = &CurrentTrack{
 				listeningTime: 0,
@@ -81,7 +81,14 @@ func tick() {
 
 			pubsub.Pub("SPOTIFY_PLAYER_CHANGE", message)
 		}
-	} else if player.Playing {
+
+		return
+	}
+
+	if player.Playing {
 		currentTrack.listeningTime += 1 * time.Second
+	} else if currentTrack != nil {
+		currentTrack = nil
+		pubsub.Pub("SPOTIFY_PLAYER_CHANGE", []byte(`{"is_playing": false}`))
 	}
 }
