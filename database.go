@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"golang.org/x/oauth2"
-	"os"
-	"time"
 )
 
 var db Database
@@ -17,7 +18,7 @@ type Database struct {
 }
 
 func databaseConnect() {
-	dbx, err := sqlx.Connect("postgres", "dbname=spotifyservice sslmode=disable")
+	dbx, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", config.DbLogin, config.DbPassword, config.Dbname))
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)

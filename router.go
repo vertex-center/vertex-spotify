@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/quentinguidee/microservice-core/router"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/quentinguidee/microservice-core/router"
 )
 
 func InitializeRouter() *gin.Engine {
