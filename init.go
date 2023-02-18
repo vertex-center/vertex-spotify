@@ -18,7 +18,7 @@ type Config struct {
 	SpotifyRedirectUri  string `env:"SPOTIFY_REDIRECT_URI,required"`
 	DbLogin             string `env:"DB_LOGIN" envDefault:""`
 	DbPassword          string `env:"DB_PASSWORD" envDefault:""`
-	Dbname              string `env:"DB_NAME" envDefault:"spotifyservice"`
+	DbName              string `env:"DB_NAME" envDefault:"spotifyservice"`
 }
 
 func main() {

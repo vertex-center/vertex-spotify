@@ -18,7 +18,7 @@ type Database struct {
 }
 
 func databaseConnect() {
-	dbx, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", config.DbLogin, config.DbPassword, config.Dbname))
+	dbx, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", config.DbLogin, config.DbPassword, config.DbName))
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
