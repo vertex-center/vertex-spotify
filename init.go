@@ -16,7 +16,7 @@ type Config struct {
 	SpotifyClientID     string `env:"SPOTIFY_CLIENT_ID,required"`
 	SpotifyClientSecret string `env:"SPOTIFY_CLIENT_SECRET,required"`
 	SpotifyRedirectUri  string `env:"SPOTIFY_REDIRECT_URI,required"`
-	DbLogin             string `env:"DB_LOGIN" envDefault:""`
+	DbUser              string `env:"DB_LOGIN" envDefault:""`
 	DbPassword          string `env:"DB_PASSWORD" envDefault:""`
 	DbName              string `env:"DB_NAME" envDefault:"spotifyservice"`
 }
