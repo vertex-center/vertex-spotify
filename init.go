@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
 	"github.com/quentinguidee/microservice-core/pubsub"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
-	"log"
 )
 
 var config Config
@@ -15,6 +16,9 @@ type Config struct {
 	SpotifyClientID     string `env:"SPOTIFY_CLIENT_ID,required"`
 	SpotifyClientSecret string `env:"SPOTIFY_CLIENT_SECRET,required"`
 	SpotifyRedirectUri  string `env:"SPOTIFY_REDIRECT_URI,required"`
+	DbUser              string `env:"DB_LOGIN" envDefault:""`
+	DbPassword          string `env:"DB_PASSWORD" envDefault:""`
+	DbName              string `env:"DB_NAME" envDefault:"spotifyservice"`
 }
 
 func main() {

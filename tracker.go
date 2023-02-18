@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/quentinguidee/microservice-core/pubsub"
 	"github.com/zmb3/spotify/v2"
-	"time"
 )
 
 type CurrentTrack struct {
