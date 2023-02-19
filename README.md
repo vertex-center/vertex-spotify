@@ -1,26 +1,31 @@
-# Spotify Service `BETA`
+<p align="center">
+    <img height="96" src="https://github.com/vertex-center/vertex-design/raw/main/logos/transparent/vertex_logo_transparent.png" alt="Vertex logo" />
+</p>
+<h1 align="center">Vertex Spotify</h1>
 
-A Spotify microservice for your Home Lab.
+<p align="center">
+<img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/vertex-center/vertex-spotify?color=DE3C4B&labelColor=1E212B&style=for-the-badge">
+<img alt="GitHub license" src="https://img.shields.io/github/license/vertex-center/vertex-spotify?color=DE3C4B&labelColor=1E212B&style=for-the-badge">
+<img alt="GitHub contributors" src="https://img.shields.io/github/contributors/vertex-center/vertex-spotify?color=DE3C4B&labelColor=1E212B&style=for-the-badge">
+</p>
+
+## About
+
+Vertex service to communicate between Spotify and your Vertex network. It also aggregate statistics and manage player events.
 
 ## Features
 
-- [x] **Player state**
+- Vertex Spotify posts Spotify player state changes on your [Redis Pub/Sub](https://redis.io/docs/manual/pubsub/) instance (or [Vertex Redis](https://github.com/vertex-center/vertex-redis)).
+- (soon) Vertex Spotify can aggregate your Spotify statistics. Other services can then reuse them easily.
 
-  The *Spotify Service* post the current Spotify player state on your [Redis Pub/Sub](https://redis.io/docs/manual/pubsub/) instance. Services like [Discord Service](https://github.com/quentinguidee/discord-service) can then reuse these events to display different things.
+## Install
 
-  <img width="231" alt="image" src="https://user-images.githubusercontent.com/12123721/219262662-e6dfaa9d-dfd6-4c7c-8e00-38e4d3c7a9ff.png">
+Vertex Spotify is compatible with the Vertex Installer.
 
-- [ ] **Statistics**
+## Related
 
-  This service can aggregate your Spotify statistics. Other services can then reuse them easily.
-  
-  *Soon available on [cloud.sh](https://github.com/quentinguidee/cloud-sh-client)*
+See the [Vertex](https://github.com/vertex-center/vertex) repository to see other services available.
 
-- [ ] *More coming soon...*
+## License
 
-## Setup
-
-*This service is currently a work-in-progress.*
-
-- Install Redis. Run an instance with the `redis-server` command.
-- Run `./spotifyservice`
+[Vertex Spotify](https://github.com/vertex-center/vertex-spotify) is released under the [MIT License](./LICENSE.md).
