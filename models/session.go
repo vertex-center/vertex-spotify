@@ -7,7 +7,7 @@ import (
 )
 
 type Session struct {
-	Id           uint
+	ID           uint `gorm:"primaryKey"`
 	AccessToken  string
 	TokenType    string
 	RefreshToken string

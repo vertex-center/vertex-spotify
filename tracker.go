@@ -8,6 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/quentinguidee/microservice-core/pubsub"
+	"github.com/vertex-center/vertex-spotify/database"
+	"github.com/vertex-center/vertex-spotify/models"
 	"github.com/vertex-center/vertex-spotify/session"
 	"github.com/zmb3/spotify/v2"
 )
@@ -62,10 +64,67 @@ func tick() {
 
 	// The track changed
 	if currentTrack != nil && currentTrack.track.ID != player.Item.ID {
-		// TODO: Save the track
-		fmt.Printf("Played %s during %s seconds\n", currentTrack.track.Name, currentTrack.listeningTime)
+		t := currentTrack.track
+		a := currentTrack.track.Album
+
+		fmt.Printf("Saved listening: %s during %s seconds\n", t.Name, currentTrack.listeningTime)
+
+		var artists []*models.Artist
+		for _, artist := range a.Artists {
+			artists = append(artists, &models.Artist{
+				SpotifyID: string(artist.ID),
+				Name:      artist.Name,
+				Uri:       string(artist.URI),
+				Url:       artist.ExternalURLs["spotify"],
+			})
+		}
+
+		var images []models.AlbumImage
+		for _, image := range a.Images {
+			images = append(images, models.AlbumImage{
+				Height: image.Height,
+				Width:  image.Width,
+				Url:    image.URL,
+			})
+		}
+
+		album := models.Album{
+			SpotifyID:            string(a.ID),
+			Name:                 a.Name,
+			Artists:              artists,
+			Group:                a.AlbumGroup,
+			Type:                 a.AlbumType,
+			Uri:                  string(a.URI),
+			Url:                  a.ExternalURLs["spotify"],
+			ReleaseDate:          a.ReleaseDate,
+			ReleaseDatePrecision: a.ReleaseDatePrecision,
+			Images:               images,
+		}
+
+		track := models.Track{
+			SpotifyID:  string(t.ID),
+			Name:       t.Name,
+			Duration:   t.Duration,
+			Explicit:   t.Explicit,
+			Uri:        string(t.URI),
+			Url:        t.ExternalURLs["spotify"],
+			Type:       t.Type,
+			Album:      album,
+			Popularity: t.Popularity,
+		}
+
+		listening := models.Listening{
+			Duration: currentTrack.listeningTime,
+			Track:    track,
+		}
 
 		currentTrack = nil
+
+		err := database.SaveListening(listening)
+		if err != nil {
+			fmt.Print(err.Error())
+			return
+		}
 	}
 
 	if currentTrack == nil && player.Playing {
