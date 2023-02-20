@@ -6,12 +6,12 @@ import (
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
 	"github.com/quentinguidee/microservice-core/pubsub"
+	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
-	spotifyauth "github.com/zmb3/spotify/v2/auth"
+	"github.com/vertex-center/vertex-spotify/session"
 )
 
 var environment Environment
-var auth *spotifyauth.Authenticator
 
 type Environment struct {
 	SpotifyClientID     string `env:"SPOTIFY_CLIENT_ID,required"`
@@ -24,6 +24,12 @@ type Environment struct {
 
 func main() {
 	loadEnv()
+
+	auth.Init(auth.Config{
+		SpotifyClientID:     environment.SpotifyClientID,
+		SpotifyClientSecret: environment.SpotifyClientSecret,
+		SpotifyRedirectUri:  environment.SpotifyRedirectUri,
+	})
 
 	pubsub.InitPubSub()
 
@@ -43,7 +49,7 @@ func main() {
 
 	token, err := database.GetToken()
 	if err == nil {
-		SetSession(token)
+		session.SetSession(token)
 	} else {
 		println(err.Error())
 	}
@@ -64,16 +70,4 @@ func loadEnv() {
 	if err != nil {
 		log.Fatalf("Failed to parse .env to Config: %v", err)
 	}
-
-	auth = spotifyauth.New(
-		spotifyauth.WithClientID(environment.SpotifyClientID),
-		spotifyauth.WithClientSecret(environment.SpotifyClientSecret),
-		spotifyauth.WithRedirectURL(environment.SpotifyRedirectUri),
-		spotifyauth.WithScopes(
-			spotifyauth.ScopeUserReadPrivate,
-			spotifyauth.ScopeUserReadPlaybackState,
-			spotifyauth.ScopeUserReadCurrentlyPlaying,
-			spotifyauth.ScopeStreaming,
-		),
-	)
 }

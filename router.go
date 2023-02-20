@@ -1,14 +1,14 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/quentinguidee/microservice-core/router"
+	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
+	"github.com/vertex-center/vertex-spotify/session"
 )
 
 func InitializeRouter() *gin.Engine {
@@ -27,19 +27,20 @@ func InitializeRouter() *gin.Engine {
 }
 
 func handleAuthLogin(c *gin.Context) {
-	url := auth.AuthURL("STATE") // TODO: Randomize
+	url := auth.URL()
 
 	c.Redirect(http.StatusFound, url)
 }
 
 func handleAuthCallback(c *gin.Context) {
 	code := c.Query("code")
-	token, err := auth.Exchange(context.Background(), code)
+	token, err := auth.Exchange(code)
 	if err != nil {
-		log.Fatalf("Couldn't retrieve token: %v", err)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 
-	SetSession(token)
+	session.SetSession(token)
 
 	err = database.SetToken(token)
 	if err != nil {
@@ -52,13 +53,13 @@ func handleAuthCallback(c *gin.Context) {
 }
 
 func handleGetUser(c *gin.Context) {
-	session, err := GetSession()
+	sess, err := session.GetSession()
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
-	user, err := session.client.CurrentUser(c)
+	user, err := sess.Client.CurrentUser(c)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -68,20 +69,19 @@ func handleGetUser(c *gin.Context) {
 }
 
 func handlePlayer(c *gin.Context) {
-	session, err := GetSession()
+	sess, err := session.GetSession()
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
 	if c.Query("full") != "" {
-		playing, err := session.client.PlayerCurrentlyPlaying(c)
+		playing, err := sess.Client.PlayerCurrentlyPlaying(c)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
-			return
+		} else {
+			c.JSON(http.StatusOK, playing)
 		}
-
-		c.JSON(http.StatusOK, playing)
 		return
 	}
 

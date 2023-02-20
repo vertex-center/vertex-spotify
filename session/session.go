@@ -1,4 +1,4 @@
-package main
+package session
 
 import (
 	"context"
@@ -13,7 +13,7 @@ var session *Session = nil
 
 type Session struct {
 	token  oauth2.Token
-	client *spotify.Client
+	Client *spotify.Client
 }
 
 func GetSession() (*Session, error) {
@@ -28,6 +28,6 @@ func SetSession(token *oauth2.Token) {
 
 	session = &Session{
 		token:  *token,
-		client: spotify.New(httpClient),
+		Client: spotify.New(httpClient),
 	}
 }

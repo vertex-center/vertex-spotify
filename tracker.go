@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/quentinguidee/microservice-core/pubsub"
+	"github.com/vertex-center/vertex-spotify/session"
 	"github.com/zmb3/spotify/v2"
 )
 
@@ -47,13 +48,13 @@ func startTicker() {
 }
 
 func tick() {
-	session, err := GetSession()
+	sess, err := session.GetSession()
 	if err != nil {
 		fmt.Printf("Failed to ping. User not (yet) logged in.\n")
 		return
 	}
 
-	player, err := session.client.PlayerCurrentlyPlaying(context.Background())
+	player, err := sess.Client.PlayerCurrentlyPlaying(context.Background())
 	if err != nil {
 		fmt.Printf("Failed to get 'player currently playing' info: %v\n", err)
 		return
