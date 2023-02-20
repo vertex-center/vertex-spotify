@@ -11,7 +11,7 @@ type Config struct {
 	Name     string
 }
 
-func (c Config) ConnectionString() string {
+func (c Config) DSN() string {
 	var params []string
 
 	if c.User != "" {

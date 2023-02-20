@@ -29,11 +29,15 @@ func main() {
 
 	r := InitializeRouter()
 
-	database.Connect(database.Config{
+	err := database.Connect(database.Config{
 		User:     environment.DbUser,
 		Password: environment.DbPassword,
 		Name:     environment.DbName,
 	})
+	if err != nil {
+		log.Fatalln(err.Error())
+		return
+	}
 
 	startTicker()
 

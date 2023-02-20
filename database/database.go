@@ -1,79 +1,64 @@
 package database
 
 import (
-	"errors"
-	"fmt"
-	"os"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/vertex-center/vertex-spotify/models"
 	"golang.org/x/oauth2"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var db Database
+var instance Database
 
 type Database struct {
-	Instance *sqlx.DB
+	db *gorm.DB
 }
 
-func Connect(config Config) {
-	dbx, err := sqlx.Connect("postgres", config.ConnectionString())
+func Connect(config Config) error {
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN: config.DSN(),
+	}))
+
+	instance.db = db
+
+	err = instance.db.AutoMigrate(&models.Session{})
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		return err
 	}
 
-	db.Instance = dbx
-
-	//_, err = db.Instance.Exec("DROP TABLE sessions")
-	_, err = db.Instance.Query(`
-		CREATE TABLE IF NOT EXISTS sessions (
-		    AccessToken VARCHAR,
-		    TokenType VARCHAR,
-		    RefreshToken VARCHAR,
-		    Expiry VARCHAR
-	    )
-	`)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
+	return nil
 }
 
 func GetToken() (*oauth2.Token, error) {
-	var token oauth2.Token
-	var expiry string
-
-	row := db.Instance.QueryRow("SELECT * FROM sessions;")
-	if row == nil {
-		return nil, errors.New("session not found")
+	var session models.Session
+	result := instance.db.Take(&session)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-
-	err := row.Scan(&token.AccessToken, &token.TokenType, &token.RefreshToken, &expiry)
-	if err != nil {
-		return nil, err
-	}
-
-	exp, err := time.Parse(time.RFC3339, expiry)
-	token.Expiry = exp
-
-	fmt.Printf("%+v\n", token)
-	return &token, nil
+	return session.GetToken()
 }
 
 func SetToken(token *oauth2.Token) error {
-	tx := db.Instance.MustBegin()
+	session := models.Session{
+		Id:           1,
+		AccessToken:  token.AccessToken,
+		TokenType:    token.TokenType,
+		RefreshToken: token.RefreshToken,
+		Expiry:       token.Expiry.Format(time.RFC3339),
+	}
 
-	_ = tx.MustExec("TRUNCATE TABLE sessions")
-	_ = tx.MustExec(
-		`INSERT INTO sessions (AccessToken, TokenType, RefreshToken, Expiry) VALUES ($1, $2, $3, $4);`,
-		token.AccessToken,
-		token.TokenType,
-		token.RefreshToken,
-		token.Expiry.Format(time.RFC3339),
-	)
+	result := instance.db.Where(&models.Session{Id: 1}).Updates(&session)
+	if result.Error != nil {
+		return result.Error
+	}
 
-	return tx.Commit()
+	if result.RowsAffected == 0 {
+		result = instance.db.Create(&session)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
 }
