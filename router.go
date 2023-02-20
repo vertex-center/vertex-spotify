@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/quentinguidee/microservice-core/router"
+	"github.com/vertex-center/vertex-spotify/database"
 )
 
 func InitializeRouter() *gin.Engine {
@@ -40,7 +41,7 @@ func handleAuthCallback(c *gin.Context) {
 
 	SetSession(token)
 
-	err = db.SetToken(token)
+	err = database.SetToken(token)
 	if err != nil {
 		fmt.Printf("%v", err)
 	}

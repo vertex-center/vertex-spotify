@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"errors"
@@ -17,8 +17,8 @@ type Database struct {
 	Instance *sqlx.DB
 }
 
-func databaseConnect() {
-	dbx, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", config.DbUser, config.DbPassword, config.DbName))
+func Connect(config Config) {
+	dbx, err := sqlx.Connect("postgres", config.ConnectionString())
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -42,7 +42,7 @@ func databaseConnect() {
 	}
 }
 
-func (db Database) GetToken() (*oauth2.Token, error) {
+func GetToken() (*oauth2.Token, error) {
 	var token oauth2.Token
 	var expiry string
 
@@ -63,7 +63,7 @@ func (db Database) GetToken() (*oauth2.Token, error) {
 	return &token, nil
 }
 
-func (db Database) SetToken(token *oauth2.Token) error {
+func SetToken(token *oauth2.Token) error {
 	tx := db.Instance.MustBegin()
 
 	_ = tx.MustExec("TRUNCATE TABLE sessions")

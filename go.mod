@@ -1,4 +1,4 @@
-module SpotifyService
+module github.com/vertex-center/vertex-spotify
 
 go 1.19
 

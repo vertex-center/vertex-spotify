@@ -6,18 +6,19 @@ import (
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
 	"github.com/quentinguidee/microservice-core/pubsub"
+	"github.com/vertex-center/vertex-spotify/database"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
 
-var config Config
+var environment Environment
 var auth *spotifyauth.Authenticator
 
-type Config struct {
+type Environment struct {
 	SpotifyClientID     string `env:"SPOTIFY_CLIENT_ID,required"`
 	SpotifyClientSecret string `env:"SPOTIFY_CLIENT_SECRET,required"`
 	SpotifyRedirectUri  string `env:"SPOTIFY_REDIRECT_URI,required"`
-	DbUser              string `env:"DB_USER" envDefault:""`
-	DbPassword          string `env:"DB_PASSWORD" envDefault:""`
+	DbUser              string `env:"DB_USER"`
+	DbPassword          string `env:"DB_PASSWORD"`
 	DbName              string `env:"DB_NAME" envDefault:"spotifyservice"`
 }
 
@@ -28,10 +29,15 @@ func main() {
 
 	r := InitializeRouter()
 
-	databaseConnect()
+	database.Connect(database.Config{
+		User:     environment.DbUser,
+		Password: environment.DbPassword,
+		Name:     environment.DbName,
+	})
+
 	startTicker()
 
-	token, err := db.GetToken()
+	token, err := database.GetToken()
 	if err == nil {
 		SetSession(token)
 	} else {
@@ -50,15 +56,15 @@ func loadEnv() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	err = env.Parse(&config)
+	err = env.Parse(&environment)
 	if err != nil {
 		log.Fatalf("Failed to parse .env to Config: %v", err)
 	}
 
 	auth = spotifyauth.New(
-		spotifyauth.WithClientID(config.SpotifyClientID),
-		spotifyauth.WithClientSecret(config.SpotifyClientSecret),
-		spotifyauth.WithRedirectURL(config.SpotifyRedirectUri),
+		spotifyauth.WithClientID(environment.SpotifyClientID),
+		spotifyauth.WithClientSecret(environment.SpotifyClientSecret),
+		spotifyauth.WithRedirectURL(environment.SpotifyRedirectUri),
 		spotifyauth.WithScopes(
 			spotifyauth.ScopeUserReadPrivate,
 			spotifyauth.ScopeUserReadPlaybackState,
