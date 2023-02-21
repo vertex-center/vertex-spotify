@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/quentinguidee/microservice-core/router"
+	"github.com/vertex-center/vertex-core-golang/router"
 	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
 	"github.com/vertex-center/vertex-spotify/session"

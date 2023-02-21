@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/quentinguidee/microservice-core/pubsub"
+	"github.com/vertex-center/vertex-core-golang/pubsub"
 	"github.com/vertex-center/vertex-spotify/database"
 	"github.com/vertex-center/vertex-spotify/models"
 	"github.com/vertex-center/vertex-spotify/session"
@@ -140,7 +140,10 @@ func tick() {
 				return
 			}
 
-			pubsub.Pub("SPOTIFY_PLAYER_CHANGE", message)
+			err = pubsub.Pub("SPOTIFY_PLAYER_CHANGE", message)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 
 		return
@@ -150,6 +153,9 @@ func tick() {
 		currentTrack.listeningTime += 1 * time.Second
 	} else if currentTrack != nil {
 		currentTrack = nil
-		pubsub.Pub("SPOTIFY_PLAYER_CHANGE", []byte(`{"is_playing": false}`))
+		err := pubsub.Pub("SPOTIFY_PLAYER_CHANGE", []byte(`{"is_playing": false}`))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 }

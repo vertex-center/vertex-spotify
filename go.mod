@@ -6,7 +6,6 @@ require (
 	github.com/caarlos0/env/v7 v7.0.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/joho/godotenv v1.5.1
-	github.com/quentinguidee/microservice-core v0.0.0-20230216001659-34905ce174ff
 	github.com/zmb3/spotify/v2 v2.3.1
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
 	gorm.io/driver/postgres v1.4.8
@@ -35,6 +34,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/redis/go-redis/v9 v9.0.2 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
+	github.com/vertex-center/vertex-core-golang v0.0.0-20230221192738-87081cf2604d // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect

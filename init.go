@@ -5,7 +5,7 @@ import (
 
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
-	"github.com/quentinguidee/microservice-core/pubsub"
+	"github.com/vertex-center/vertex-core-golang/pubsub"
 	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
 	"github.com/vertex-center/vertex-spotify/session"
