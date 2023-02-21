@@ -52,7 +52,7 @@ func startTicker() {
 func tick() {
 	sess, err := session.GetSession()
 	if err != nil {
-		fmt.Printf("Failed to ping. User not (yet) logged in.\n")
+		fmt.Println(err)
 		return
 	}
 
@@ -62,100 +62,124 @@ func tick() {
 		return
 	}
 
-	// The track changed
-	if currentTrack != nil && currentTrack.track.ID != player.Item.ID {
-		t := currentTrack.track
-		a := currentTrack.track.Album
+	spotifyPlaying := player.Playing
+	vertexPlaying := currentTrack != nil
 
-		fmt.Printf("Saved listening: %s during %s seconds\n", t.Name, currentTrack.listeningTime)
-
-		var artists []*models.Artist
-		for _, artist := range a.Artists {
-			artists = append(artists, &models.Artist{
-				SpotifyID: string(artist.ID),
-				Name:      artist.Name,
-				Uri:       string(artist.URI),
-				Url:       artist.ExternalURLs["spotify"],
-			})
-		}
-
-		var images []models.AlbumImage
-		for _, image := range a.Images {
-			images = append(images, models.AlbumImage{
-				Height: image.Height,
-				Width:  image.Width,
-				Url:    image.URL,
-			})
-		}
-
-		album := models.Album{
-			SpotifyID:            string(a.ID),
-			Name:                 a.Name,
-			Artists:              artists,
-			Group:                a.AlbumGroup,
-			Type:                 a.AlbumType,
-			Uri:                  string(a.URI),
-			Url:                  a.ExternalURLs["spotify"],
-			ReleaseDate:          a.ReleaseDate,
-			ReleaseDatePrecision: a.ReleaseDatePrecision,
-			Images:               images,
-		}
-
-		track := models.Track{
-			SpotifyID:  string(t.ID),
-			Name:       t.Name,
-			Duration:   t.Duration,
-			Explicit:   t.Explicit,
-			Uri:        string(t.URI),
-			Url:        t.ExternalURLs["spotify"],
-			Type:       t.Type,
-			Album:      album,
-			Popularity: t.Popularity,
-		}
-
-		listening := models.Listening{
-			Duration: currentTrack.listeningTime,
-			Track:    track,
-		}
-
-		currentTrack = nil
-
-		err := database.SaveListening(listening)
-		if err != nil {
-			fmt.Print(err.Error())
-			return
-		}
+	if !vertexPlaying && !spotifyPlaying {
+		// Nothing happens, do nothing.
+		return
 	}
 
-	if currentTrack == nil && player.Playing {
-		if player.Item != nil {
-			currentTrack = &CurrentTrack{
-				listeningTime: 0,
-				track:         *player.Item,
-			}
+	if vertexPlaying && !spotifyPlaying {
+		currentTrack = nil
+		fmt.Println("[tracker] Spotify paused.")
 
-			message, err := json.Marshal(currentTrack.ToJSON())
-			if err != nil {
-				fmt.Printf("Failed to parse currentTrack info: %v\n", err)
-				return
-			}
-
-			err = pubsub.Pub("SPOTIFY_PLAYER_CHANGE", message)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
+		err := pubsub.Pub("SPOTIFY_PLAYER_CHANGE", []byte(`{"is_playing": false}`))
+		if err != nil {
+			fmt.Println(err)
 		}
 
 		return
 	}
 
-	if player.Playing {
-		currentTrack.listeningTime += 1 * time.Second
-	} else if currentTrack != nil {
-		currentTrack = nil
-		err := pubsub.Pub("SPOTIFY_PLAYER_CHANGE", []byte(`{"is_playing": false}`))
-		if err != nil {
-			fmt.Println(err.Error())
+	if spotifyPlaying {
+		if !vertexPlaying || currentTrack.track.ID != player.Item.ID {
+			// play->play: If the track changed, save the track
+			// pause->play: Save the track
+
+			if !vertexPlaying {
+				fmt.Println("[tracker] Spotify play.")
+			} else if vertexPlaying && currentTrack.track.ID != player.Item.ID {
+				fmt.Println("[tracker] Track changed.")
+
+				err := saveListening()
+				if err != nil {
+					fmt.Printf("Failed to save this listening: %v\n", err)
+				}
+			}
+
+			currentTrack = &CurrentTrack{
+				listeningTime: 0,
+				track:         *player.Item,
+			}
+
+			err = pubPlayerChange()
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			currentTrack.listeningTime += 1 * time.Second
 		}
+
+		return
 	}
+}
+
+func pubPlayerChange() error {
+	message, err := json.Marshal(currentTrack.ToJSON())
+	if err != nil {
+		return fmt.Errorf("Failed to parse currentTrack info: %v\n", err)
+	}
+
+	return pubsub.Pub("SPOTIFY_PLAYER_CHANGE", message)
+}
+
+func saveListening() error {
+	t := currentTrack.track
+	a := currentTrack.track.Album
+
+	fmt.Printf("[tracker] Saved listening: %s during %s seconds\n", t.Name, currentTrack.listeningTime)
+
+	var artists []*models.Artist
+	for _, artist := range a.Artists {
+		artists = append(artists, &models.Artist{
+			SpotifyID: string(artist.ID),
+			Name:      artist.Name,
+			Uri:       string(artist.URI),
+			Url:       artist.ExternalURLs["spotify"],
+		})
+	}
+
+	var images []models.AlbumImage
+	for _, image := range a.Images {
+		images = append(images, models.AlbumImage{
+			Height: image.Height,
+			Width:  image.Width,
+			Url:    image.URL,
+		})
+	}
+
+	album := models.Album{
+		SpotifyID:            string(a.ID),
+		Name:                 a.Name,
+		Artists:              artists,
+		Group:                a.AlbumGroup,
+		Type:                 a.AlbumType,
+		Uri:                  string(a.URI),
+		Url:                  a.ExternalURLs["spotify"],
+		ReleaseDate:          a.ReleaseDate,
+		ReleaseDatePrecision: a.ReleaseDatePrecision,
+		Images:               images,
+	}
+
+	track := models.Track{
+		SpotifyID:  string(t.ID),
+		Name:       t.Name,
+		Duration:   t.Duration,
+		Explicit:   t.Explicit,
+		Uri:        string(t.URI),
+		Url:        t.ExternalURLs["spotify"],
+		Type:       t.Type,
+		Album:      album,
+		Popularity: t.Popularity,
+	}
+
+	listening := models.Listening{
+		Duration: currentTrack.listeningTime,
+		Track:    track,
+	}
+
+	currentTrack = nil
+
+	return database.SaveListening(listening)
 }
