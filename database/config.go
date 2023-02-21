@@ -28,6 +28,5 @@ func (c Config) DSN() string {
 
 	params = append(params, "sslmode=disable")
 
-	println(strings.Join(params, " "))
 	return strings.Join(params, " ")
 }

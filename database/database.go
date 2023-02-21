@@ -16,13 +16,15 @@ type Database struct {
 }
 
 func Connect(config Config) error {
-	db, err := gorm.Open(postgres.New(postgres.Config{
+	var err error
+	instance.db, err = gorm.Open(postgres.New(postgres.Config{
 		DSN: config.DSN(),
 	}))
+	if err != nil {
+		return err
+	}
 
-	instance.db = db
-
-	err = instance.db.AutoMigrate(
+	return instance.db.AutoMigrate(
 		&models.Album{},
 		&models.AlbumImage{},
 		&models.Artist{},
@@ -30,11 +32,6 @@ func Connect(config Config) error {
 		&models.Session{},
 		&models.Track{},
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func GetToken() (*oauth2.Token, error) {
@@ -105,11 +102,6 @@ func SaveListening(listening models.Listening) error {
 			return result.Error
 		}
 
-		result = tx.Create(&listening)
-		if result.Error != nil {
-			return result.Error
-		}
-
-		return nil
+		return tx.Create(&listening).Error
 	})
 }
