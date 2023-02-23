@@ -14,21 +14,21 @@ import (
 var environment Environment
 
 type Environment struct {
-	SpotifyClientID     string `env:"SPOTIFY_CLIENT_ID,required"`
-	SpotifyClientSecret string `env:"SPOTIFY_CLIENT_SECRET,required"`
-	SpotifyRedirectUri  string `env:"SPOTIFY_REDIRECT_URI,required"`
-	DbUser              string `env:"DB_USER"`
-	DbPassword          string `env:"DB_PASSWORD"`
-	DbName              string `env:"DB_NAME" envDefault:"spotifyservice"`
+	SpotifyID          string `env:"SPOTIFY_ID,required"`
+	SpotifySecret      string `env:"SPOTIFY_SECRET,required"`
+	SpotifyRedirectUri string `env:"SPOTIFY_REDIRECT_URI,required"`
+	DbUser             string `env:"DB_USER"`
+	DbPassword         string `env:"DB_PASSWORD"`
+	DbName             string `env:"DB_NAME" envDefault:"spotifyservice"`
 }
 
 func main() {
 	loadEnv()
 
 	auth.Init(auth.Config{
-		SpotifyClientID:     environment.SpotifyClientID,
-		SpotifyClientSecret: environment.SpotifyClientSecret,
-		SpotifyRedirectUri:  environment.SpotifyRedirectUri,
+		SpotifyID:          environment.SpotifyID,
+		SpotifySecret:      environment.SpotifySecret,
+		SpotifyRedirectUri: environment.SpotifyRedirectUri,
 	})
 
 	pubsub.InitPubSub()

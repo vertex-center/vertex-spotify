@@ -33,6 +33,13 @@ func handleAuthLogin(c *gin.Context) {
 }
 
 func handleAuthCallback(c *gin.Context) {
+	authError := c.Query("error")
+	if authError != "" {
+		err := fmt.Errorf("error: %v", authError)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	code := c.Query("code")
 	token, err := auth.Exchange(code)
 	if err != nil {
@@ -53,13 +60,13 @@ func handleAuthCallback(c *gin.Context) {
 }
 
 func handleGetUser(c *gin.Context) {
-	sess, err := session.GetSession()
+	client, err := session.GetClient()
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
-	user, err := sess.Client.CurrentUser(c)
+	user, err := client.CurrentUser(c)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -69,14 +76,14 @@ func handleGetUser(c *gin.Context) {
 }
 
 func handlePlayer(c *gin.Context) {
-	sess, err := session.GetSession()
+	client, err := session.GetClient()
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
 	if c.Query("full") != "" {
-		playing, err := sess.Client.PlayerCurrentlyPlaying(c)
+		playing, err := client.PlayerCurrentlyPlaying(c)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 		} else {

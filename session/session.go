@@ -3,6 +3,7 @@ package session
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
@@ -12,22 +13,28 @@ import (
 var session *Session = nil
 
 type Session struct {
-	token  oauth2.Token
 	Client *spotify.Client
 }
 
-func GetSession() (*Session, error) {
-	if session == nil {
-		return nil, errors.New("user not logged in to Spotify")
+func GetToken() (*oauth2.Token, error) {
+	token, err := session.Client.Token()
+	if err != nil {
+		return nil, fmt.Errorf("user not logged in to Spotify: %v", err)
 	}
-	return session, nil
+	return token, nil
+}
+
+func GetClient() (*spotify.Client, error) {
+	if session.Client == nil {
+		return nil, errors.New("client is null")
+	}
+	return session.Client, nil
 }
 
 func SetSession(token *oauth2.Token) {
 	httpClient := spotifyauth.New().Client(context.Background(), token)
 
 	session = &Session{
-		token:  *token,
 		Client: spotify.New(httpClient),
 	}
 }

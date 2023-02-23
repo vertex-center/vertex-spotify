@@ -8,17 +8,17 @@ import (
 )
 
 type Config struct {
-	SpotifyClientID     string
-	SpotifyClientSecret string
-	SpotifyRedirectUri  string
+	SpotifyID          string
+	SpotifySecret      string
+	SpotifyRedirectUri string
 }
 
 var auth *spotifyauth.Authenticator
 
 func Init(config Config) {
 	auth = spotifyauth.New(
-		spotifyauth.WithClientID(config.SpotifyClientID),
-		spotifyauth.WithClientSecret(config.SpotifyClientSecret),
+		spotifyauth.WithClientID(config.SpotifyID),
+		spotifyauth.WithClientSecret(config.SpotifySecret),
 		spotifyauth.WithRedirectURL(config.SpotifyRedirectUri),
 		spotifyauth.WithScopes(
 			spotifyauth.ScopeUserReadPrivate,

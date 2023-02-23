@@ -50,13 +50,13 @@ func startTicker() {
 }
 
 func tick() {
-	sess, err := session.GetSession()
+	client, err := session.GetClient()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	player, err := sess.Client.PlayerCurrentlyPlaying(context.Background())
+	player, err := client.PlayerCurrentlyPlaying(context.Background())
 	if err != nil {
 		fmt.Printf("Failed to get 'player currently playing' info: %v\n", err)
 		return
