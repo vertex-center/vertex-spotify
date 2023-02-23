@@ -90,11 +90,16 @@ func tick() {
 			if !vertexPlaying {
 				fmt.Println("[tracker] Spotify play.")
 			} else if vertexPlaying && currentTrack.track.ID != player.Item.ID {
-				fmt.Println("[tracker] Track changed.")
-
-				err := saveListening()
-				if err != nil {
-					fmt.Printf("Failed to save this listening: %v\n", err)
+				if currentTrack.listeningTime.Seconds() >= 5 {
+					fmt.Printf("[tracker] Saving '%s' (%s seconds)...\n", currentTrack.track.Name, currentTrack.listeningTime)
+					err := saveListening()
+					if err != nil {
+						fmt.Printf("[tracker] Track changed but failed to save: %v\n.", err)
+					} else {
+						fmt.Println("[tracker] Track changed and saved successfully.")
+					}
+				} else {
+					fmt.Printf("[tracker] Track '%s' skipped and not saved (%s < 5s).\n", currentTrack.track.Name, currentTrack.listeningTime)
 				}
 			}
 
@@ -127,8 +132,6 @@ func pubPlayerChange() error {
 func saveListening() error {
 	t := currentTrack.track
 	a := currentTrack.track.Album
-
-	fmt.Printf("[tracker] Saved listening: %s during %s seconds\n", t.Name, currentTrack.listeningTime)
 
 	var artists []*models.Artist
 	for _, artist := range a.Artists {
