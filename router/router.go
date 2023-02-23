@@ -52,7 +52,8 @@ func handleAuthCallback(c *gin.Context) {
 
 	err = database.SetToken(token)
 	if err != nil {
-		fmt.Printf("%v", err)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

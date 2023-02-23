@@ -1,10 +1,12 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
+	"github.com/vertex-center/vertex-core-golang/console"
 	"github.com/vertex-center/vertex-core-golang/pubsub"
 	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
@@ -13,6 +15,7 @@ import (
 	"github.com/vertex-center/vertex-spotify/tracker"
 )
 
+var logger = console.New("vertex-spotify::init")
 var environment Environment
 
 type Environment struct {
@@ -43,7 +46,7 @@ func main() {
 		Name:     environment.DbName,
 	})
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Error(err)
 		return
 	}
 
@@ -53,23 +56,25 @@ func main() {
 	if err == nil {
 		session.SetToken(token)
 	} else {
-		println(err.Error())
+		logger.Error(err)
 	}
 
 	err = r.Run(":6150")
 	if err != nil {
-		log.Fatalf("Error while starting server: %v", err)
+		logger.Error(fmt.Errorf("error while starting server: %v", err))
+		os.Exit(1)
+		return
 	}
 }
 
 func loadEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		logger.Error(fmt.Errorf("error loading .env file: %v", err))
 	}
 
 	err = env.Parse(&environment)
 	if err != nil {
-		log.Fatalf("Failed to parse .env to Config: %v", err)
+		logger.Error(fmt.Errorf("failed to parse .env to Config: %v", err))
 	}
 }

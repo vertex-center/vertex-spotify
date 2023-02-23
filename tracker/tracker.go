@@ -7,12 +7,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vertex-center/vertex-core-golang/console"
 	"github.com/vertex-center/vertex-core-golang/pubsub"
 	"github.com/vertex-center/vertex-spotify/database"
 	"github.com/vertex-center/vertex-spotify/models"
 	"github.com/vertex-center/vertex-spotify/session"
 	"github.com/zmb3/spotify/v2"
 )
+
+var logger = console.New("vertex-spotify::tracker")
 
 type CurrentTrack struct {
 	listeningTime time.Duration
@@ -56,13 +59,13 @@ func Start() {
 func tick() {
 	client, err := session.GetClient()
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 		return
 	}
 
 	player, err := client.PlayerCurrentlyPlaying(context.Background())
 	if err != nil {
-		fmt.Printf("Failed to get 'player currently playing' info: %v\n", err)
+		logger.Error(fmt.Errorf("failed to get 'player currently playing' info: %v", err))
 		return
 	}
 
@@ -76,11 +79,11 @@ func tick() {
 
 	if vertexPlaying && !spotifyPlaying {
 		currentTrack = nil
-		fmt.Println("[tracker] Spotify paused.")
+		logger.Log("Spotify paused.")
 
 		err := pubsub.Pub("SPOTIFY_PLAYER_CHANGE", []byte(`{"is_playing": false}`))
 		if err != nil {
-			fmt.Println(err)
+			logger.Warn(fmt.Sprintf("couldn't publish 'SPOTIFY_PLAYER_CHANGE' event: %v", err))
 		}
 
 		return
@@ -92,18 +95,18 @@ func tick() {
 			// pause->play: Save the track
 
 			if !vertexPlaying {
-				fmt.Println("[tracker] Spotify play.")
+				logger.Log("Spotify play.")
 			} else if vertexPlaying && currentTrack.track.ID != player.Item.ID {
 				if currentTrack.listeningTime.Seconds() >= 5 {
-					fmt.Printf("[tracker] Saving '%s' (%s seconds)...\n", currentTrack.track.Name, currentTrack.listeningTime)
+					logger.Log(fmt.Sprintf("saving '%s' (%s seconds)...", currentTrack.track.Name, currentTrack.listeningTime))
 					err := saveListening()
 					if err != nil {
-						fmt.Printf("[tracker] Track changed but failed to save: %v\n.", err)
+						logger.Error(fmt.Errorf("track changed but failed to save: %v", err))
 					} else {
-						fmt.Println("[tracker] Track changed and saved successfully.")
+						logger.Log("track changed and saved successfully")
 					}
 				} else {
-					fmt.Printf("[tracker] Track '%s' skipped and not saved (%s < 5s).\n", currentTrack.track.Name, currentTrack.listeningTime)
+					logger.Log(fmt.Sprintf("track '%s' skipped and not saved (%s < 5s)", currentTrack.track.Name, currentTrack.listeningTime))
 				}
 			}
 
@@ -114,7 +117,7 @@ func tick() {
 
 			err = pubPlayerChange()
 			if err != nil {
-				fmt.Println(err)
+				logger.Warn(fmt.Sprintf("couldn't publish 'SPOTIFY_PLAYER_CHANGE' event: %v", err))
 			}
 		} else {
 			currentTrack.listeningTime += 1 * time.Second
