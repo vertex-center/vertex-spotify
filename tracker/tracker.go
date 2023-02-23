@@ -1,4 +1,4 @@
-package main
+package tracker
 
 import (
 	"context"
@@ -21,6 +21,10 @@ type CurrentTrack struct {
 
 var currentTrack *CurrentTrack
 
+func GetCurrentTrack() *CurrentTrack {
+	return currentTrack
+}
+
 func (t CurrentTrack) ToJSON() gin.H {
 	return gin.H{
 		"is_playing": true,
@@ -34,7 +38,7 @@ func (t CurrentTrack) ToJSON() gin.H {
 
 var ticker = time.NewTicker(1500 * time.Millisecond)
 
-func startTicker() {
+func Start() {
 	done := make(chan bool)
 
 	go func() {

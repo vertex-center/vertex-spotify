@@ -16,6 +16,13 @@ type Session struct {
 	Client *spotify.Client
 }
 
+func GetClient() (*spotify.Client, error) {
+	if session.Client == nil {
+		return nil, errors.New("client is null")
+	}
+	return session.Client, nil
+}
+
 func GetToken() (*oauth2.Token, error) {
 	token, err := session.Client.Token()
 	if err != nil {
@@ -24,14 +31,7 @@ func GetToken() (*oauth2.Token, error) {
 	return token, nil
 }
 
-func GetClient() (*spotify.Client, error) {
-	if session.Client == nil {
-		return nil, errors.New("client is null")
-	}
-	return session.Client, nil
-}
-
-func SetSession(token *oauth2.Token) {
+func SetToken(token *oauth2.Token) {
 	httpClient := spotifyauth.New().Client(context.Background(), token)
 
 	session = &Session{

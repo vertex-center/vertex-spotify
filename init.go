@@ -8,7 +8,9 @@ import (
 	"github.com/vertex-center/vertex-core-golang/pubsub"
 	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
+	"github.com/vertex-center/vertex-spotify/router"
 	"github.com/vertex-center/vertex-spotify/session"
+	"github.com/vertex-center/vertex-spotify/tracker"
 )
 
 var environment Environment
@@ -33,7 +35,7 @@ func main() {
 
 	pubsub.InitPubSub()
 
-	r := InitializeRouter()
+	r := router.InitializeRouter()
 
 	err := database.Connect(database.Config{
 		User:     environment.DbUser,
@@ -45,11 +47,11 @@ func main() {
 		return
 	}
 
-	startTicker()
+	tracker.Start()
 
 	token, err := database.GetToken()
 	if err == nil {
-		session.SetSession(token)
+		session.SetToken(token)
 	} else {
 		println(err.Error())
 	}

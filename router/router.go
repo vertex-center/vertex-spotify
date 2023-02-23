@@ -1,18 +1,19 @@
-package main
+package router
 
 import (
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vertex-center/vertex-core-golang/router"
+	vertexrouter "github.com/vertex-center/vertex-core-golang/router"
 	"github.com/vertex-center/vertex-spotify/auth"
 	"github.com/vertex-center/vertex-spotify/database"
 	"github.com/vertex-center/vertex-spotify/session"
+	"github.com/vertex-center/vertex-spotify/tracker"
 )
 
 func InitializeRouter() *gin.Engine {
-	r := router.CreateRouter()
+	r := vertexrouter.CreateRouter()
 
 	authRoutes := r.Group("/auth")
 	authRoutes.GET("/login", handleAuthLogin)
@@ -47,7 +48,7 @@ func handleAuthCallback(c *gin.Context) {
 		return
 	}
 
-	session.SetSession(token)
+	session.SetToken(token)
 
 	err = database.SetToken(token)
 	if err != nil {
@@ -92,5 +93,5 @@ func handlePlayer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, currentTrack.ToJSON())
+	c.JSON(http.StatusOK, tracker.GetCurrentTrack().ToJSON())
 }
