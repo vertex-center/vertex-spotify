@@ -16,7 +16,7 @@ Vertex service to communicate between Spotify and your Vertex network. It also a
 ## Features
 
 - Vertex Spotify posts Spotify player state changes on your [Redis Pub/Sub](https://redis.io/docs/manual/pubsub/) instance (or [Vertex Redis](https://github.com/vertex-center/vertex-redis)).
-- (soon) Vertex Spotify can aggregate your Spotify statistics. Other services can then reuse them easily.
+- Vertex Spotify aggregates your Spotify statistics.
 
 ## Install
 
