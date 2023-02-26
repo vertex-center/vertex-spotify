@@ -1,0 +1,6 @@
+{
+    "id": "vertex-spotify",
+    "name": "Vertex Spotify",
+    "repository": "github.com/vertex-center/vertex-spotify",
+    "description": "This Spotify service collects all your spotify listening and can publish player events on Redis."
+}

@@ -1,0 +1,4 @@
+release:
+  #  prerelease: auto
+  extra_files:
+    - glob: ./.vertex/service.json
