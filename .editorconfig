@@ -2,3 +2,6 @@ root = true
 
 [*]
 indent_size = 4
+
+[*.yaml]
+indent_size = 2

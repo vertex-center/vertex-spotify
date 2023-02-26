@@ -2,3 +2,8 @@ release:
   #  prerelease: auto
   extra_files:
     - glob: ./.vertex/service.json
+
+archives:
+  - files:
+      - LICENSE.md
+      - .vertex/service.json
