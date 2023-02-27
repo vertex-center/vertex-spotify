@@ -8,7 +8,7 @@
             "type": "port",
             "name": "PORT",
             "display_name": "Server Port",
-            "default": 6150,
+            "default": "6150",
             "description": "The port to expose the API of this Vertex Spotify server."
         },
         {
